@@ -20,6 +20,7 @@
 #include "sbi-path.h"
 #include "ngap-path.h"
 #include "metrics.h"
+#include "ogs-trace.h"
 
 static ogs_thread_t *thread;
 static void amf_main(void *data);
@@ -52,6 +53,9 @@ int amf_initialize(void)
     if (rv != OGS_OK) return rv;
 
     rv = amf_context_nf_info();
+    if (rv != OGS_OK) return rv;
+
+    rv = ogs_trace_init("AMF", ogs_app()->trace_uri);
     if (rv != OGS_OK) return rv;
 
     ogs_metrics_context_open(ogs_metrics_self());
@@ -111,6 +115,7 @@ void amf_terminate(void)
     amf_context_final();
     ogs_sbi_context_final();
 
+    ogs_trace_final();
     amf_metrics_final();
 }
 

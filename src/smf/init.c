@@ -23,6 +23,7 @@
 #include "pfcp-path.h"
 #include "sbi-path.h"
 #include "metrics.h"
+#include "ogs-trace.h"
 
 static ogs_thread_t *thread;
 static void smf_main(void *data);
@@ -72,6 +73,10 @@ int smf_initialize(void)
 
     rv = ogs_pfcp_ue_pool_generate();
     if (rv != OGS_OK) return rv;
+
+    rv = ogs_trace_init("SMF", ogs_app()->trace_uri);
+    if (rv != OGS_OK)
+        return rv;
 
     ogs_metrics_context_open(ogs_metrics_self());
 
@@ -145,6 +150,7 @@ void smf_terminate(void)
     ogs_pfcp_xact_final();
     ogs_gtp_xact_final();
 
+    ogs_trace_final();
     smf_metrics_final();
 }
 

@@ -480,6 +480,7 @@ bool udr_nudr_dr_handle_subscription_provisioned(
         OpenAPI_list_t *DefaultSingleNssaiList = NULL;
         OpenAPI_list_t *SingleNssaiList = NULL;
         OpenAPI_snssai_t *Snssai = NULL;
+        OpenAPI_trace_data_t *TraceData = NULL;
 
         OpenAPI_lnode_t *node = NULL;
 
@@ -588,6 +589,19 @@ bool udr_nudr_dr_handle_subscription_provisioned(
                 AccessAndMobilitySubscriptionData.nssai = &NSSAI;
         }
 
+        char *trace_ref = ogs_strdup("00101-abcdef");
+        char *ne_type_list = ogs_strdup("todo");
+        char *event_list = ogs_strdup("todo");
+        TraceData = OpenAPI_trace_data_create(trace_ref,
+                OpenAPI_trace_depth_MAXIMUM,
+                ne_type_list,
+                event_list,
+                NULL/*collection_entity_ipv4_addr*/,
+                NULL/*collection_entity_ipv6_addr*/,
+                NULL/*interface_list*/);
+        ogs_assert(TraceData);
+        AccessAndMobilitySubscriptionData.trace_data = TraceData;
+
         memset(&sendmsg, 0, sizeof(sendmsg));
         sendmsg.AccessAndMobilitySubscriptionData =
             &AccessAndMobilitySubscriptionData;
@@ -596,6 +610,8 @@ bool udr_nudr_dr_handle_subscription_provisioned(
         ogs_assert(response);
         ogs_assert(true == ogs_sbi_server_send_response(stream, response));
 
+        if (TraceData)
+            OpenAPI_trace_data_free(TraceData);
         OpenAPI_list_for_each(GpsiList, node) {
             if (node->data) ogs_free(node->data);
         }
